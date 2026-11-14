@@ -10,9 +10,14 @@ import * as sqliteAdapter from "./sqlite.js";
 
 const HOST = process.env.EZDB_HOST || "127.0.0.1";
 const PORT = Number(process.env.EZDB_PORT || 8080);
-const ENGINES = new Set(["postgres", "mongo", "mysql"]);
+const ENGINES = new Set(["postgres", "mongo", "mysql", "mariadb"]);
 
-const sql = { postgres: pgAdapter, mysql: mysqlAdapter, sqlite: sqliteAdapter };
+const sql = {
+	postgres: pgAdapter,
+	mysql: mysqlAdapter,
+	mariadb: mysqlAdapter,
+	sqlite: sqliteAdapter,
+};
 
 export function createApp({ sessions = createSessionStore() } = {}) {
 	async function session(cookie) {
@@ -113,7 +118,7 @@ export function createApp({ sessions = createSessionStore() } = {}) {
 					client =
 						body.engine === "postgres"
 							? await pgAdapter.connectPostgres(opts)
-							: body.engine === "mysql"
+							: body.engine === "mysql" || body.engine === "mariadb"
 								? await mysqlAdapter.connectMySQL(opts)
 								: await mongoAdapter.connectMongo(opts);
 				} catch {

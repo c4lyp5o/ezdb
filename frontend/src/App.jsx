@@ -74,6 +74,7 @@ function Connect({ onConnected }) {
 						<span>PostgreSQL</span>
 						<span>MongoDB</span>
 						<span>MySQL</span>
+						<span>MariaDB</span>
 						<span>SQLite</span>
 					</div>
 				</div>
@@ -103,7 +104,7 @@ function Connect({ onConnected }) {
 								port:
 									e.target.value === "mongo"
 										? 27017
-										: e.target.value === "mysql"
+										: e.target.value === "mysql" || e.target.value === "mariadb"
 											? 3306
 											: 5432,
 							})
@@ -112,6 +113,7 @@ function Connect({ onConnected }) {
 						<option value="postgres">PostgreSQL</option>
 						<option value="mongo">MongoDB</option>
 						<option value="mysql">MySQL</option>
+						<option value="mariadb">MariaDB</option>
 						<option value="sqlite">SQLite upload</option>
 					</select>
 				</label>

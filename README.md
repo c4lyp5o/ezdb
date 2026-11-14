@@ -6,11 +6,11 @@
 
 A quiet, dark-first ez-series workspace built with Bun, Elysia, React, Vite and Tailwind 4. Version metadata lives in package.json and appears in the footer. The footer links to the GitHub repository.
 
-Lightweight, self-hosted database browser: PostgreSQL public-schema tables and MongoDB collections. Database credentials are the identity; database permissions enforce access.
+Lightweight, self-hosted database browser: PostgreSQL public-schema tables, MySQL/MariaDB tables, uploaded SQLite databases and MongoDB collections. Database credentials are the identity; database permissions enforce access.
 
 ## Run
 
-Requires Bun 1.4.4 and an existing PostgreSQL or MongoDB server. PostgreSQL 16 and MongoDB 7 are the tested targets. MongoDB users authenticate against admin; database-connection TLS configuration is not currently exposed by the login form.
+Requires Bun 1.4.4 and an existing PostgreSQL, MySQL, MariaDB or MongoDB server, or a standalone SQLite upload. PostgreSQL 16, MySQL 8.4, MariaDB 11.4 and MongoDB 7 are the tested server targets. MongoDB users authenticate against admin; database-connection TLS configuration is not currently exposed by the login form.
 
     bun install --frozen-lockfile
     bun run build
@@ -29,7 +29,7 @@ Open http://127.0.0.1:8080. Defaults to loopback; EZDB_HOST and EZDB_PORT overri
 
 ## Boundaries
 
-Local/private administration only, not a public multi-user service. No saved connections, SQL/query editor, schema management, bulk edits, MySQL or SQLite yet. MongoDB top-level dotted/operator field names are refused; removing fields is not supported. Large tables use exact PostgreSQL counts; MongoDB totals are estimates. Tables scroll horizontally on phones.
+Local/private administration only, not a public multi-user service. No saved connections, SQL/query editor, schema management, bulk edits. MongoDB top-level dotted/operator field names are refused; removing fields is not supported. Large tables use exact PostgreSQL counts; MongoDB totals are estimates. Tables scroll horizontally on phones.
 
 Sessions and connections are in memory, expire after 30 idle minutes and are swept periodically. Cookie lifetime is 30 minutes. Disconnect closes the connection; restart discards sessions. Use least-privilege database users and TLS at a trusted reverse proxy if accessing remotely. This is not a comprehensive security audit.
 
@@ -40,7 +40,7 @@ Sessions and connections are in memory, expire after 30 idle minutes and are swe
     bun test
     bun run build
 
-Integration tests require isolated ezdb_test databases on loopback PostgreSQL 55432 (postgres user) and MongoDB 57017 (ezdb user, admin authentication). Export PG_PASSWORD and MONGO_PASSWORD securely. Tests reset named fixture tables/collections; never point them at production.
+Integration tests require isolated ezdb_test databases on loopback PostgreSQL 55432 (postgres user), MySQL 53306, MariaDB 53307 and MongoDB 57017 (ezdb user; MongoDB admin authentication). Export PG_PASSWORD, MYSQL_PASSWORD, MARIADB_PASSWORD and MONGO_PASSWORD securely. Tests reset named fixture tables/collections; never point them at production. See CONTRIBUTING.md for fixture setup.
 
 With the built server running and Python Playwright installed:
 
@@ -57,7 +57,7 @@ The multi-stage image pins Bun 1.4.4, installs the lockfile, builds the frontend
 
 ## GitHub workflow
 
-The workflow in .github/workflows/ci.yml follows the ez-series Test → GHCR image pattern. PRs and pushes to main, master or development run locked dependency installation, release metadata validation, lint, typecheck, isolated PostgreSQL/MongoDB tests, production build and real Chromium smoke tests. Browser evidence is uploaded as an artifact. Only successful push runs publish an amd64 image; PRs and manual runs do not publish.
+The workflow in .github/workflows/ci.yml follows the ez-series Test → GHCR image pattern. PRs and pushes to main, master or development run locked dependency installation, release metadata validation, lint, typecheck, isolated PostgreSQL/MySQL/MariaDB/MongoDB tests, production build and real Chromium smoke tests. Browser evidence is uploaded as an artifact. Only successful push runs publish an amd64 image; PRs and manual runs do not publish.
 
 Stable branches publish latest and their branch name, development publishes development, and version tags publish their exact tag. Every image also receives a full commit-SHA tag. Version tags must match package.json. The built-in GITHUB_TOKEN needs packages:write for publishing. There is no deploy job and no automatic GitHub Release creation. These are configured workflows, not a claim of a successful hosted CI run.
 
@@ -72,10 +72,16 @@ Stable branches publish latest and their branch name, development publishes deve
 
 The footer displays the package version and links to [c4lyp5o/ezdb](https://github.com/c4lyp5o/ezdb). The repository is private, so viewing source requires GitHub access.
 
-## MySQL and uploaded SQLite
+## MySQL, MariaDB and uploaded SQLite
 
-MySQL tables now support browsing, pagination and record CRUD using database permissions. SQLite accepts standalone database uploads (32 MiB maximum); no server path or environment configuration is needed. Uploading requires explicit acknowledgement that the entire database is sent to a trusted server/operator. Use an offline backup, not a live WAL file.
+MySQL and MariaDB tables support browsing, pagination and record CRUD using database permissions. SQLite accepts standalone database uploads (32 MiB maximum); no server path or environment configuration is needed. Uploading requires explicit acknowledgement that the entire database is sent to a trusted server/operator. Use an offline backup, not a live WAL file.
 
 Uploaded files are private per session, use generated storage names, and are removed on disconnect or 30 idle minutes. A fixed 24-hour deadline is enforced independently of activity; a 30-second cleanup sweep and startup sweep remove expired files and SQLite sidecars. If the server is stopped, cleanup resumes at startup. Operator backups/forensic erasure cannot be guaranteed. Download the edited copy before leaving; the original local file is not changed. Primary keys are required for individual SQL edits/deletes. No raw SQL console is exposed.
 
-CI uses Ubuntu 24.04 and updated Node 24-based Actions, with isolated MySQL 8.4 integration fixtures.
+CI uses Ubuntu 24.04 and updated Node 24-based Actions, with isolated MySQL 8.4 and MariaDB 11.4 integration fixtures.
+
+### MariaDB support
+
+Select **MariaDB** in the connection form (default port 3306). It shares the MySQL protocol adapter, not a separate driver. Supported operations: list tables, paginated browse, insert, update and delete; individual edits/deletes require a complete primary key. Database permissions apply. Tested against MariaDB 11.4; other versions are not verified.
+
+Tests require an isolated loopback MariaDB on port 53307, database ezdb_test, user ezdb. Supply MARIADB_PASSWORD securely for test fixtures only. CI provisions this instance automatically. MariaDB coverage includes real HTTP login/session/CRUD/logout, composite-key guards, identifier injection refusal and redacted authentication failures.

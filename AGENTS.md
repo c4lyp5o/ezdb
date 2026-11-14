@@ -2,7 +2,7 @@
 
 ## Objective and structure
 
-A small private database browser, not a query IDE. PostgreSQL public-schema tables and MongoDB collections; individual record CRUD only. See README.md and DEVELOPER.md.
+A small private database browser, not a query IDE. PostgreSQL public-schema tables, MySQL/MariaDB tables, uploaded SQLite databases and MongoDB collections; individual record CRUD only. See README.md and DEVELOPER.md.
 
 - backend/: Elysia API, adapters, sessions and same-origin assets.
 - frontend/: React + Vite + Tailwind 4; shared ez tokens from ezjot/ezups/ezconv.

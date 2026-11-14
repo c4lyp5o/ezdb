@@ -16,6 +16,7 @@ jobs:
     name: Test
     runs-on: ubuntu-24.04
     env:
+      MARIADB_PASSWORD: ci-mariadb-fixture-only
       MYSQL_PASSWORD: ci-mysql-fixture-only
       PG_PASSWORD: ci-pg-fixture-only
       MONGO_PASSWORD: ci-mongo-fixture-only
@@ -30,6 +31,17 @@ jobs:
         ports: ["53306:3306"]
         options: >-
           --health-cmd "mysqladmin ping -h 127.0.0.1"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: "yes"
+          MARIADB_DATABASE: ezdb_test
+          MARIADB_USER: ezdb
+          MARIADB_PASSWORD: ci-mariadb-fixture-only
+        ports: ["53307:3306"]
+        options: >-
+          --health-cmd "healthcheck.sh --connect --innodb_initialized"
           --health-interval 5s --health-timeout 5s --health-retries 30
       postgres:
         image: postgres:16-alpine

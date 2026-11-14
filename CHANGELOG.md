@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — MariaDB
+
+- Added explicit MariaDB connection option (port 3306), sharing the MySQL adapter.
+- Verified MariaDB 11.4 login, browsing, pagination and CRUD with primary-key guards.
+- Added MariaDB integration and browser login coverage plus an isolated CI service.
+
 Versions follow Semantic Versioning. Entries describe implemented changes, not publication status.
 
 ## Unreleased — 1.0.0
@@ -24,13 +30,13 @@ Versions follow Semantic Versioning. Entries describe implemented changes, not p
 ### Known limits
 
 - PostgreSQL public schema only; MongoDB authentication uses admin.
-- No arbitrary queries, schema changes, bulk edits, field removal, MySQL or SQLite.
+- No arbitrary queries, schema changes, bulk edits or field removal.
 - Mobile data grids scroll horizontally. Physical-phone testing and exhaustive database-type coverage remain unverified.
 
-## MySQL and uploaded SQLite
+## MySQL, MariaDB and uploaded SQLite
 
-MySQL tables now support browsing, pagination and record CRUD using database permissions. SQLite accepts standalone database uploads (32 MiB maximum); no server path or environment configuration is needed. Uploading requires explicit acknowledgement that the entire database is sent to a trusted server/operator. Use an offline backup, not a live WAL file.
+MySQL and MariaDB tables support browsing, pagination and record CRUD using database permissions. SQLite accepts standalone database uploads (32 MiB maximum); no server path or environment configuration is needed. Uploading requires explicit acknowledgement that the entire database is sent to a trusted server/operator. Use an offline backup, not a live WAL file.
 
 Uploaded files are private per session, use generated storage names, and are removed on disconnect or 30 idle minutes. A fixed 24-hour deadline is enforced independently of activity; a 30-second cleanup sweep and startup sweep remove expired files and SQLite sidecars. If the server is stopped, cleanup resumes at startup. Operator backups/forensic erasure cannot be guaranteed. Download the edited copy before leaving; the original local file is not changed. Primary keys are required for individual SQL edits/deletes. No raw SQL console is exposed.
 
-CI uses Ubuntu 24.04 and updated Node 24-based Actions, with isolated MySQL 8.4 integration fixtures.
+CI uses Ubuntu 24.04 and updated Node 24-based Actions, with isolated MySQL 8.4 and MariaDB 11.4 integration fixtures.

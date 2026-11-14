@@ -74,47 +74,52 @@ test("SQLite API refuses missing trust, isolates sessions and downloads edited c
 		await app.stop();
 	}
 });
-test("MySQL real CRUD, composite keys, injection and no-key guards", async () => {
-	const c = await mysql.connectMySQL({
-		host: "127.0.0.1",
-		port: 53306,
-		user: "ezdb",
-		password: process.env.MYSQL_PASSWORD || "",
-		database: "ezdb_test",
-	});
-	try {
-		await c.execute("DROP TABLE IF EXISTS engine_items");
-		await c.execute(
-			"CREATE TABLE engine_items(a INT, b INT, name TEXT, PRIMARY KEY(a,b))",
-		);
-		await mysql.insertRow(c, "engine_items", { a: 1, b: 2, name: "hello" });
-		await mysql.updateRow(
-			c,
-			"engine_items",
-			{ a: 1, b: 2 },
-			{ name: "edited" },
-		);
-		expect(
-			(await mysql.listRows(c, "engine_items", { size: 10, offset: 0 })).rows[0]
-				.name,
-		).toBe("edited");
-		await expect(
-			mysql.deleteRow(c, "engine_items", { a: 1 }),
-		).rejects.toThrow();
-		await expect(
-			mysql.updateRow(c, "engine_items", { a: 1, b: 2 }, { a: 2 }),
-		).rejects.toThrow();
-		await expect(
-			mysql.listRows(c, "engine_items; DROP TABLE engine_items", {
-				size: 10,
-				offset: 0,
-			}),
-		).rejects.toThrow();
-		expect(await mysql.deleteRow(c, "engine_items", { a: 1, b: 2 })).toEqual({
-			deleted: 1,
+for (const engine of ["mysql", "mariadb"]) {
+	test(`${engine} real CRUD, composite keys, injection and key guards`, async () => {
+		const c = await mysql.connectMySQL({
+			host: "127.0.0.1",
+			port: engine === "mysql" ? 53306 : 53307,
+			user: "ezdb",
+			password:
+				process.env[
+					engine === "mysql" ? "MYSQL_PASSWORD" : "MARIADB_PASSWORD"
+				] || "",
+			database: "ezdb_test",
 		});
-	} finally {
-		await c.execute("DROP TABLE IF EXISTS engine_items");
-		await c.end();
-	}
-});
+		try {
+			await c.execute("DROP TABLE IF EXISTS engine_items");
+			await c.execute(
+				"CREATE TABLE engine_items(a INT, b INT, name TEXT, PRIMARY KEY(a,b))",
+			);
+			await mysql.insertRow(c, "engine_items", { a: 1, b: 2, name: "hello" });
+			await mysql.updateRow(
+				c,
+				"engine_items",
+				{ a: 1, b: 2 },
+				{ name: "edited" },
+			);
+			expect(
+				(await mysql.listRows(c, "engine_items", { size: 10, offset: 0 }))
+					.rows[0].name,
+			).toBe("edited");
+			await expect(
+				mysql.deleteRow(c, "engine_items", { a: 1 }),
+			).rejects.toThrow();
+			await expect(
+				mysql.updateRow(c, "engine_items", { a: 1, b: 2 }, { a: 2 }),
+			).rejects.toThrow();
+			await expect(
+				mysql.listRows(c, "engine_items; DROP TABLE engine_items", {
+					size: 10,
+					offset: 0,
+				}),
+			).rejects.toThrow();
+			expect(await mysql.deleteRow(c, "engine_items", { a: 1, b: 2 })).toEqual({
+				deleted: 1,
+			});
+		} finally {
+			await c.execute("DROP TABLE IF EXISTS engine_items");
+			await c.end();
+		}
+	});
+}

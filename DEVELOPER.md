@@ -26,10 +26,16 @@ No schema changes, arbitrary queries, bulk editing or field deletion. PostgreSQL
 
 Use only on localhost or a trusted private network with least-privilege users. Connection/rate quotas, exhaustive database-type coverage and a full security audit remain future hardening work; do not expose this service directly to the public internet.
 
-## MySQL and uploaded SQLite
+## MySQL, MariaDB and uploaded SQLite
 
-MySQL tables now support browsing, pagination and record CRUD using database permissions. SQLite accepts standalone database uploads (32 MiB maximum); no server path or environment configuration is needed. Uploading requires explicit acknowledgement that the entire database is sent to a trusted server/operator. Use an offline backup, not a live WAL file.
+MySQL and MariaDB tables support browsing, pagination and record CRUD using database permissions. SQLite accepts standalone database uploads (32 MiB maximum); no server path or environment configuration is needed. Uploading requires explicit acknowledgement that the entire database is sent to a trusted server/operator. Use an offline backup, not a live WAL file.
 
 Uploaded files are private per session, use generated storage names, and are removed on disconnect or 30 idle minutes. A fixed 24-hour deadline is enforced independently of activity; a 30-second cleanup sweep and startup sweep remove expired files and SQLite sidecars. If the server is stopped, cleanup resumes at startup. Operator backups/forensic erasure cannot be guaranteed. Download the edited copy before leaving; the original local file is not changed. Primary keys are required for individual SQL edits/deletes. No raw SQL console is exposed.
 
-CI uses Ubuntu 24.04 and updated Node 24-based Actions, with isolated MySQL 8.4 integration fixtures.
+CI uses Ubuntu 24.04 and updated Node 24-based Actions, with isolated MySQL 8.4 and MariaDB 11.4 integration fixtures.
+
+### MariaDB support
+
+Select **MariaDB** in the connection form (default port 3306). It shares the MySQL protocol adapter, not a separate driver. Supported operations: list tables, paginated browse, insert, update and delete; individual edits/deletes require a complete primary key. Database permissions apply. Tested against MariaDB 11.4; other versions are not verified.
+
+Tests require an isolated loopback MariaDB on port 53307, database ezdb_test, user ezdb. Supply MARIADB_PASSWORD securely for test fixtures only. CI provisions this instance automatically. MariaDB coverage includes real HTTP login/session/CRUD/logout, composite-key guards, identifier injection refusal and redacted authentication failures.
