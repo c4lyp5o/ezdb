@@ -1,0 +1,46 @@
+import sqlite3, tempfile, os
+from pathlib import Path
+from playwright.sync_api import sync_playwright, expect
+with tempfile.TemporaryDirectory() as tmp:
+    filename=str(Path(tmp)/"demo.db")
+    db=sqlite3.connect(filename)
+    db.execute("CREATE TABLE items(id INTEGER PRIMARY KEY, name TEXT)")
+    db.execute("INSERT INTO items VALUES(1,'hello')")
+    db.commit()
+    db.close()
+    with sync_playwright() as pw:
+        browser=pw.chromium.launch()
+        for width in [1280,390]:
+            ctx=browser.new_context(viewport={"width":width,"height":900})
+            page=ctx.new_page()
+            page.goto("http://127.0.0.1:8080")
+            page.locator("select").first.select_option("sqlite")
+            expect(page.get_by_text("Warning: your entire database will be uploaded to this server.")).to_be_visible()
+            page.get_by_label("SQLite database",exact=True).set_input_files(filename)
+            page.get_by_label("I trust this server",exact=False).check()
+            page.get_by_role("button",name="Connect",exact=True).click()
+            expect(page.get_by_role("button",name="Disconnect",exact=True)).to_be_visible()
+            page.get_by_role("button",name="items",exact=True).click()
+            expect(page.get_by_text("hello",exact=True)).to_be_visible()
+            with page.expect_download() as download:
+                page.get_by_role("link",name="Download edited SQLite database").click()
+            download.value.save_as(str(Path(tmp)/f"download-{width}.db"))
+            copy=sqlite3.connect(str(Path(tmp)/f"download-{width}.db"))
+            assert copy.execute("SELECT name FROM items").fetchone()[0]=="hello"
+            copy.close()
+            assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
+            page.get_by_role("button",name="Disconnect",exact=True).click()
+            ctx.close()
+        ctx=browser.new_context()
+        page=ctx.new_page()
+        page.goto("http://127.0.0.1:8080")
+        page.locator("select").first.select_option("mysql")
+        page.get_by_label("Port",exact=True).fill("53306")
+        page.get_by_label("Database",exact=True).fill("ezdb_test")
+        page.get_by_label("User",exact=True).fill("ezdb")
+        page.get_by_label("Password",exact=True).fill(os.environ.get("MYSQL_PASSWORD",""))
+        page.get_by_role("button",name="Connect",exact=True).click()
+        expect(page.get_by_role("button",name="Disconnect",exact=True)).to_be_visible()
+        page.get_by_role("button",name="Disconnect",exact=True).click()
+        browser.close()
+print("SQLite upload/warning/download/disconnect passed at 1280px and 390px; MySQL login passed")

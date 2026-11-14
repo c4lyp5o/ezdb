@@ -27,6 +27,8 @@ function Brand() {
 }
 
 function Connect({ onConnected }) {
+	const [file, setFile] = useState(null);
+	const [trust, setTrust] = useState(false);
 	const [form, setForm] = useState(DEFAULTS);
 	const [error, setError] = useState("");
 	const [busy, setBusy] = useState(false);
@@ -36,7 +38,13 @@ function Connect({ onConnected }) {
 		setBusy(true);
 		setError("");
 		try {
-			await api.connect({ ...form, port: Number(form.port) });
+			if (form.engine === "sqlite") {
+				const body = new FormData();
+				body.set("file", file);
+				body.set("trust", trust ? "yes" : "no");
+				const res = await fetch("/api/sqlite/upload", { method: "POST", body });
+				if (!res.ok) throw new Error((await res.json()).message);
+			} else await api.connect({ ...form, port: Number(form.port) });
 			onConnected(form.engine, form.database);
 		} catch (err) {
 			setError(err.message);
@@ -65,6 +73,8 @@ function Connect({ onConnected }) {
 					<div className="engine-tags">
 						<span>PostgreSQL</span>
 						<span>MongoDB</span>
+						<span>MySQL</span>
+						<span>SQLite</span>
 					</div>
 				</div>
 				<p className="text-xs text-mute">
@@ -90,61 +100,111 @@ function Connect({ onConnected }) {
 							setForm({
 								...form,
 								engine: e.target.value,
-								port: e.target.value === "mongo" ? 27017 : 5432,
+								port:
+									e.target.value === "mongo"
+										? 27017
+										: e.target.value === "mysql"
+											? 3306
+											: 5432,
 							})
 						}
 					>
 						<option value="postgres">PostgreSQL</option>
 						<option value="mongo">MongoDB</option>
+						<option value="mysql">MySQL</option>
+						<option value="sqlite">SQLite upload</option>
 					</select>
 				</label>
-				<label className="text-sm">
-					Host
-					<input
-						className={input}
-						value={form.host}
-						onChange={(e) => setForm({ ...form, host: e.target.value })}
-						required
-					/>
-				</label>
-				<label className="text-sm">
-					Port
-					<input
-						className={input}
-						type="number"
-						value={form.port}
-						onChange={(e) => setForm({ ...form, port: e.target.value })}
-						required
-					/>
-				</label>
-				<label className="text-sm">
-					Database
-					<input
-						className={input}
-						value={form.database}
-						onChange={(e) => setForm({ ...form, database: e.target.value })}
-						required
-					/>
-				</label>
-				<label className="text-sm">
-					User
-					<input
-						className={input}
-						value={form.user}
-						autoComplete="username"
-						onChange={(e) => setForm({ ...form, user: e.target.value })}
-					/>
-				</label>
-				<label className="text-sm">
-					Password
-					<input
-						className={input}
-						type="password"
-						value={form.password}
-						autoComplete="current-password"
-						onChange={(e) => setForm({ ...form, password: e.target.value })}
-					/>
-				</label>
+				{form.engine === "sqlite" ? (
+					<section className="rounded border border-bad p-4 flex flex-col gap-3">
+						<strong className="text-bad">
+							Warning: your entire database will be uploaded to this server.
+						</strong>
+						<p>
+							Only continue if you trust this server and its operator. They can
+							read all uploaded data. Changes affect the server copy, not your
+							original file. Download your edited database before leaving.
+						</p>
+						<p>
+							Uploads are deleted after 24 hours at the latest while the server
+							runs, or sooner on disconnect or 30 minutes of inactivity. Restart
+							cleanup removes expired abandoned files. Deletion cannot erase
+							operator backups or guarantee forensic erasure. Upload a
+							standalone SQLite backup, not a live WAL database. Maximum 32 MiB.
+						</p>
+						<label>
+							SQLite database
+							<input
+								className={input}
+								type="file"
+								required
+								accept=".sqlite,.sqlite3,.db"
+								onChange={(e) => setFile(e.target.files[0])}
+							/>
+						</label>
+						<label>
+							<input
+								type="checkbox"
+								required
+								checked={trust}
+								onChange={(e) => setTrust(e.target.checked)}
+							/>{" "}
+							I trust this server and understand that my database will be
+							uploaded.
+						</label>
+					</section>
+				) : (
+					<>
+						<label className="text-sm">
+							Host
+							<input
+								className={input}
+								value={form.host}
+								onChange={(e) => setForm({ ...form, host: e.target.value })}
+								required
+							/>
+						</label>
+						<label className="text-sm">
+							Port
+							<input
+								className={input}
+								type="number"
+								value={form.port}
+								onChange={(e) => setForm({ ...form, port: e.target.value })}
+								required
+							/>
+						</label>
+						<label className="text-sm">
+							Database
+							<input
+								className={input}
+								value={form.database}
+								onChange={(e) => setForm({ ...form, database: e.target.value })}
+								required
+							/>
+						</label>
+						<label className="text-sm">
+							User
+							<input
+								className={input}
+								value={form.user}
+								autoComplete="username"
+								onChange={(e) => setForm({ ...form, user: e.target.value })}
+							/>
+						</label>
+						<label className="text-sm">
+							Password
+							<input
+								className={input}
+								type="password"
+								value={form.password}
+								autoComplete="current-password"
+								onChange={(e) => setForm({ ...form, password: e.target.value })}
+							/>
+						</label>
+					</>
+				)}
+
 				{error && (
 					<p role="alert" className="text-sm text-bad">
 						{error}
@@ -351,7 +411,7 @@ function Browser({ onDisconnect, engine, database }) {
 			<aside className="workspace-nav border-b p-5 md:w-64 md:border-r md:border-b-0">
 				<Brand />
 				<div className="eyebrow mt-10 mb-3">
-					CONNECTED / {engine === "mongo" ? "MONGODB" : "POSTGRESQL"}
+					CONNECTED / {engine.toUpperCase()}
 				</div>
 				<div className="mb-2 flex items-center justify-between text-sm font-semibold">
 					<span>{database}</span>
@@ -359,6 +419,11 @@ function Browser({ onDisconnect, engine, database }) {
 						Disconnect
 					</button>
 				</div>
+				{engine === "sqlite" && (
+					<a href="/api/sqlite/download" className="text-sm underline">
+						Download edited SQLite database
+					</a>
+				)}
 				<p className="eyebrow mt-8 mb-3">
 					{engine === "mongo" ? "COLLECTIONS" : "TABLES"} / {tables.length}
 				</p>

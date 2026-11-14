@@ -64,7 +64,7 @@ test("refuses data routes before login", async () => {
 test("refuses unknown engines and bad passwords without echoing the password", async () => {
 	const unknown = await call("/connect", {
 		method: "POST",
-		body: { ...PG, engine: "mysql" },
+		body: { ...PG, engine: "unsupported" },
 	});
 	expect(unknown.status).toBe(400);
 	const badPw = await call("/connect", {

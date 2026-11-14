@@ -36,7 +36,10 @@ export function createSessionStore({
 		async get(token) {
 			const session = sessions.get(token);
 			if (!session) return null;
-			if (session.expiresAt <= now()) {
+			if (
+				session.expiresAt <= now() ||
+				session.connection.client?.expiresAt <= now()
+			) {
 				await remove(token);
 				return null;
 			}
