@@ -1,8 +1,10 @@
 # ezdb
 
-**1.0.0 — unreleased · MIT**
+**v1.0.0 · MIT**
 
-A quiet, dark-first ez-series workspace built with Bun, Elysia, React, Vite and Tailwind 4. Version metadata lives in package.json and appears in the footer. No repository or release has been published yet.
+[GitHub repository](https://github.com/c4lyp5o/ezdb) (private; repository access required). Version 1.0.0 is pushed to master; no version tag or GitHub Release has been published.
+
+A quiet, dark-first ez-series workspace built with Bun, Elysia, React, Vite and Tailwind 4. Version metadata lives in package.json and appears in the footer. The footer links to the GitHub repository.
 
 Lightweight, self-hosted database browser: PostgreSQL public-schema tables and MongoDB collections. Database credentials are the identity; database permissions enforce access.
 
@@ -68,4 +70,4 @@ Stable branches publish latest and their branch name, development publishes deve
 - [Security boundaries and reporting](SECURITY.md)
 - [MIT license](LICENSE)
 
-The repository link in the footer remains unpublished until a real GitHub repository exists. Set up that link when publication is approved; do not ship a dead URL.
+The footer displays the package version and links to [c4lyp5o/ezdb](https://github.com/c4lyp5o/ezdb). The repository is private, so viewing source requires GitHub access.

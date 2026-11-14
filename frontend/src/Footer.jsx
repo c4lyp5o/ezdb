@@ -7,9 +7,14 @@ export default function Footer() {
 				{metadata.version ? `v${metadata.version}` : "dev"}
 			</span>
 			<span aria-hidden="true">·</span>
-			<span title="This project has not been published to GitHub yet">
-				Source not published
-			</span>
+			<a
+				href="https://github.com/c4lyp5o/ezdb"
+				target="_blank"
+				rel="noopener noreferrer"
+				className="hover:text-accent"
+			>
+				GitHub
+			</a>
 		</footer>
 	);
 }

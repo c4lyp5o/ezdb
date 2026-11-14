@@ -24,7 +24,10 @@ with sync_playwright() as pw:
             page.goto(BASE)
             expect(page.get_by_role("button", name="Connect", exact=True)).to_be_visible()
             expect(page.get_by_role("contentinfo")).to_contain_text("v1.0.0")
-            expect(page.get_by_role("contentinfo")).to_contain_text("Source not published")
+            source_link = page.get_by_role("contentinfo").get_by_role("link", name="GitHub", exact=True)
+            expect(source_link).to_be_visible()
+            expect(source_link).to_have_attribute("href", "https://github.com/c4lyp5o/ezdb")
+            expect(source_link).to_have_attribute("rel", "noopener noreferrer")
             assert not any("/api/tables" in url for url in requests)
             assert ctx.request.get(BASE + "/api/tables").status == 401
             page.screenshot(path=str(SHOTS / f"login-{width}.png"))
@@ -37,7 +40,10 @@ with sync_playwright() as pw:
                 page.get_by_role("button", name="Connect", exact=True).click()
             assert login.value.status == 201
             expect(page.get_by_role("button", name="Disconnect", exact=True)).to_be_visible()
-            expect(page.get_by_role("contentinfo")).to_contain_text("Source not published")
+            source_link = page.get_by_role("contentinfo").get_by_role("link", name="GitHub", exact=True)
+            expect(source_link).to_be_visible()
+            expect(source_link).to_have_attribute("href", "https://github.com/c4lyp5o/ezdb")
+            expect(source_link).to_have_attribute("rel", "noopener noreferrer")
             table = "ezdb_items" if engine == "postgres" else "ezdb_docs"
             endpoint = BASE + "/api/tables/" + table
             seeds = []
