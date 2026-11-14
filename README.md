@@ -71,3 +71,11 @@ Stable branches publish latest and their branch name, development publishes deve
 - [MIT license](LICENSE)
 
 The footer displays the package version and links to [c4lyp5o/ezdb](https://github.com/c4lyp5o/ezdb). The repository is private, so viewing source requires GitHub access.
+
+## MySQL and uploaded SQLite
+
+MySQL tables now support browsing, pagination and record CRUD using database permissions. SQLite accepts standalone database uploads (32 MiB maximum); no server path or environment configuration is needed. Uploading requires explicit acknowledgement that the entire database is sent to a trusted server/operator. Use an offline backup, not a live WAL file.
+
+Uploaded files are private per session, use generated storage names, and are removed on disconnect or 30 idle minutes. A fixed 24-hour deadline is enforced independently of activity; a 30-second cleanup sweep and startup sweep remove expired files and SQLite sidecars. If the server is stopped, cleanup resumes at startup. Operator backups/forensic erasure cannot be guaranteed. Download the edited copy before leaving; the original local file is not changed. Primary keys are required for individual SQL edits/deletes. No raw SQL console is exposed.
+
+CI uses Ubuntu 24.04 and updated Node 24-based Actions, with isolated MySQL 8.4 integration fixtures.
