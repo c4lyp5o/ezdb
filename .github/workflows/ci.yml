@@ -1,0 +1,115 @@
+name: CI
+on:
+  push:
+    branches: [main, master, development]
+    tags: ["v*"]
+  pull_request:
+    branches: [main, master, development]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    env:
+      PG_PASSWORD: ci-pg-fixture-only
+      MONGO_PASSWORD: ci-mongo-fixture-only
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: ezdb_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci-pg-fixture-only
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d ezdb_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      mongo:
+        image: mongo:7
+        env:
+          MONGO_INITDB_ROOT_USERNAME: ezdb
+          MONGO_INITDB_ROOT_PASSWORD: ci-mongo-fixture-only
+        ports: ["57017:27017"]
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ping:1})'"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.4.4"
+      - run: bun install --frozen-lockfile
+      - name: Validate version and release tag
+        run: bun scripts/validate-release.js
+      - run: bun run lint
+      - run: bun run typecheck
+      - run: bun test
+      - run: bun run build
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r tests/requirements.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: Real browser smoke suite
+        env:
+          TMPDIR: ${{ runner.temp }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          bun start > "$RUNNER_TEMP/ezdb-server.log" 2>&1 &
+          server=$!
+          trap 'kill "$server" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8080/ > /dev/null; then ready=true; break; fi
+            sleep 1
+          done
+          test "$ready" = true
+          python tests/ui-smoke.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ezdb-browser-evidence
+          path: |
+            ${{ runner.temp }}/ezdb-shots/
+            ${{ runner.temp }}/ezdb-server.log
+          if-no-files-found: warn
+  image:
+    name: Build and push GHCR image
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha,format=long
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' }}
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

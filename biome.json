@@ -1,0 +1,14 @@
+{
+	"files": {
+		"includes": ["**", "!frontend/dist", "!node_modules"]
+	},
+	"css": { "parser": { "tailwindDirectives": true } },
+	"formatter": {
+		"indentStyle": "tab"
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double"
+		}
+	}
+}

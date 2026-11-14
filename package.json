@@ -1,0 +1,39 @@
+{
+	"name": "ezdb",
+	"version": "1.0.0",
+	"license": "MIT",
+	"description": "Private, self-hosted PostgreSQL and MongoDB browser",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"typecheck": "bun check",
+		"test": "bun test",
+		"build": "vite build --config frontend/vite.config.js",
+		"start": "bun backend/app.js",
+		"dev": "vite --config frontend/vite.config.js",
+		"lint": "biome check .",
+		"lint:fix": "biome check --write ."
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.6.7",
+		"@tailwindcss/cli": "^4.3.5",
+		"@tailwindcss/vite": "^4.3.5",
+		"@types/bun": "latest",
+		"@vitejs/plugin-react": "^6.3.0",
+		"tailwindcss": "^4.3.5",
+		"vite": "^8.3.8"
+	},
+	"peerDependencies": {
+		"typescript": "^7"
+	},
+	"dependencies": {
+		"@fontsource-variable/public-sans": "^5.3.0",
+		"bson": "^7.3.4",
+		"elysia": "^1.4.32",
+		"mongodb": "^7.9.0",
+		"pg": "^8.23.1",
+		"react": "^19.3.1",
+		"react-dom": "^19.3.1"
+	}
+}
