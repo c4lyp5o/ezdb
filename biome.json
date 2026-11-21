@@ -1,8 +1,12 @@
 {
 	"files": {
-		"includes": ["**", "!frontend/dist", "!node_modules"]
+		"includes": ["**", "!frontend/dist", "!node_modules", "!**/*.md"]
 	},
-	"css": { "parser": { "tailwindDirectives": true } },
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
+		}
+	},
 	"formatter": {
 		"indentStyle": "tab"
 	},

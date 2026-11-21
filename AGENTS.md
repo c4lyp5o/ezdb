@@ -16,6 +16,6 @@ Use Bun 1.4.4, ESM, tabs, double quotes, semicolons and Biome. Keep changes modu
 
 Never store/log credentials, add saved passwords, or access production databases for tests. Integration tests are destructive and fixed to isolated loopback ezdb_test instances. Use environment credentials, never literals. Preserve loopback defaults, HttpOnly sessions, cross-origin mutation rejection, redacted errors and explicit delete confirmation.
 
-Run bun run lint, bun run typecheck, bun test and bun run build. For UI changes run tests/ui-smoke.py against a fresh built server with Python Playwright. Test actual login, CRUD, keyboard controls and 1280/390px layouts. A skipped or unrun check is not passing evidence. See CONTRIBUTING.md for setup.
+Run bun run lint, bun run typecheck, bun test and bun run build. For UI changes run tests/ui-smoke.py against a fresh built server with Python Playwright. Test actual login, CRUD, keyboard controls and 1280/390px layouts. A skipped or unrun check is not passing evidence. See DEVELOPER.md for setup.
 
 Update README/CHANGELOG when behavior changes. Version comes from package.json; tags must match. No commits, pushes, tags, releases or deployments without the owner's explicit authorization. Report real output and attach a review patch; never fabricate verification.

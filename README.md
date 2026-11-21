@@ -40,7 +40,7 @@ Sessions and connections are in memory, expire after 30 idle minutes and are swe
     bun test
     bun run build
 
-Integration tests require isolated ezdb_test databases on loopback PostgreSQL 55432 (postgres user), MySQL 53306, MariaDB 53307 and MongoDB 57017 (ezdb user; MongoDB admin authentication). Export PG_PASSWORD, MYSQL_PASSWORD, MARIADB_PASSWORD and MONGO_PASSWORD securely. Tests reset named fixture tables/collections; never point them at production. See CONTRIBUTING.md for fixture setup.
+Integration tests require isolated ezdb_test databases on loopback PostgreSQL 55432 (postgres user), MySQL 53306, MariaDB 53307 and MongoDB 57017 (ezdb user; MongoDB admin authentication). Export PG_PASSWORD, MYSQL_PASSWORD, MARIADB_PASSWORD and MONGO_PASSWORD securely. Tests reset named fixture tables/collections; never point them at production. See DEVELOPER.md for fixture setup.
 
 With the built server running and Python Playwright installed:
 
@@ -63,7 +63,7 @@ Stable branches publish latest and their branch name, development publishes deve
 
 ## Project documentation
 
-- [Contributing and test setup](CONTRIBUTING.md)
+- [Contributing and test setup](DEVELOPER.md)
 - [Architecture and write semantics](DEVELOPER.md)
 - [Agent contract](AGENTS.md)
 - [Changelog](CHANGELOG.md)
