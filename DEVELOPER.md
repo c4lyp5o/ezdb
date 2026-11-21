@@ -104,7 +104,7 @@ For UI checks install Python Playwright in a virtual environment (`pip install p
 
 Include behavior, tests executed and limitations in the PR. Do not include credentials, connection strings, production data or private screenshots. Use small conventional commit subjects. Work on development/feature branches and promote to main or master through reviewed PRs.
 
-Version lives in package.json; update CHANGELOG.md with each release. Tags use v followed by the exact version. CI tests PRs; pushes publish GHCR images only after tests pass. Stable branch gets latest plus its branch tag; development gets development; tags get their version; all get sha tags. No automated deployment or GitHub Release creation is configured. Repository publication, pushes, tags and releases require owner approval. See SECURITY.md for vulnerability handling.
+Version lives in package.json; update CHANGELOG.md with each release. Tags use v followed by the exact version. CI tests PRs; pushes publish GHCR images only after tests pass. Stable branch gets latest plus its branch tag; development gets development; tags get their version; all get sha tags. No automated deployment or GitHub Release creation is configured. Repository publication, pushes, tags and releases require owner approval. See [Security policy](README.md#security-policy) for vulnerability handling.
 
 #### MariaDB support
 
