@@ -1,3 +1,5 @@
-# Agent entry point
+# CLAUDE.md
 
-Read [AGENTS.md](AGENTS.md) before changing this repository. It is the canonical contributor and agent contract. Use Bun, Elysia, React, Vite and Tailwind 4; do not replace the existing stack.
+The guidance for agents lives in AGENTS.md, so every agent reads the same rules:
+
+@AGENTS.md
