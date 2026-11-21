@@ -1,6 +1,71 @@
-# Agent guide
+# AGENTS.md
 
-## Objective and structure
+Guidance for AI coding agents working on ezdb, one of the ez* self-hosted apps. **ez rules** are shared by every ez repo; **This repo** is specific to ezdb. Humans: [DEVELOPER.md](DEVELOPER.md) has the same commands with more context.
+
+<!-- ez-standard:start v1 — shared by every ez repo; edit the copy in the Hermes ez-series skill and re-sync, not this block. -->
+## ez rules (shared by every ez repo)
+
+### Ground rules
+
+1. **No commits, pushes, PRs, tags, releases or deploys without the owner's explicit OK.** Patch, test, report.
+2. **Never print, log or commit secrets.** No tokens, passwords, keys or webhook URLs in code, fixtures, logs, chat or commit messages. `.env` is never committed and never copied into an image.
+3. **Never report a check as passing unless you ran it.** Quote the real output and numbers; a skipped check is not a pass.
+4. **Tests never touch real data or real services.** Use temp dirs, throwaway database containers and mocked HTTP. Never point a test at a running instance.
+5. **Prove a regression test catches the bug.** Undo the fix, watch the test fail, restore it.
+
+### Branches and releases
+
+- `development` is the integration branch. Branch from it (`feat/…`, `fix/…`, `chore/…`) and open every PR against it.
+- `master` is released code. Only `development` merges into it, by PR. There is no `main`, `dev` or `staging`.
+- Release (only with the owner's OK): bump every `package.json` version, move `[Unreleased]` in `CHANGELOG.md` under `## [x.y.z] - YYYY-MM-DD`, merge `development` into `master`. Merging to `master` publishes the image.
+- Conventional Commits (`fix(scope): …`) with a body that says why. User-visible changes get a `CHANGELOG.md` line under `[Unreleased]`.
+
+### Stack and style
+
+- **Bun for everything**, never npm or node. The Bun version in `Dockerfile` (`oven/bun:x.y.z`) and every `bun-version:` in `.github/workflows/` must match.
+- ESM, tabs, double quotes, semicolons. Minimal, task-scoped diffs; don't reformat files you didn't change. Comments explain why, not what.
+- **Biome is the only linter**, pinned at the repo root: `bun run lint`, `bun run lint:fix`. No ESLint or Prettier. Markdown is not run through Biome.
+- **Frontend**: React + Vite + Tailwind 4 in the ez house style (shared `src/ez/` kit and tokens; ezllm is the reference). Colours come from tokens, never raw palette classes. Motion animates transform and opacity only.
+- **Icons**: every app uses the shared ez icon from ezconv: `public/icons/icon-192.png` and `icon-512.png`, linked as `rel="icon"` and `rel="apple-touch-icon"` and used in any web manifest.
+- **React Compiler** runs through `@rolldown/plugin-babel` with `reactCompilerPreset()`. `@vitejs/plugin-react` 6 has no `babel` option; passing one silently disables the compiler.
+
+### Dependencies
+
+- Lockfiles are committed. CI and Docker install with `--frozen-lockfile`. Don't touch a lockfile unless the dependency change is intentional, and review its diff.
+- Prefer releases at least a week old. Take majors one at a time and keep one only if lint, tests and build pass. Read the changelog for removed exports and options; a passing build is not proof (archiver 8 and plugin-react 6 both passed builds while breaking the app).
+
+### Docker
+
+- Images run unprivileged as `bun` (uid 1000). Every writable directory (data, uploads, logs) is created and `chown`ed in the `Dockerfile`; never write to a relative path.
+- Configuration comes from the environment at runtime (`env_file` in compose). Never `COPY .env`.
+- After changing the `Dockerfile`, the Bun version or a dependency, build the image and boot it with throwaway config. Tests don't load every entry point (workers especially).
+
+### Before you say it's done
+
+Run the lint, tests and build listed under **This repo** and report the numbers. For UI changes, also check the page in a real browser at 390px and desktop widths.
+<!-- ez-standard:end -->
+
+## This repo
+
+Select **MariaDB** in the connection form (default port 3306). It shares the MySQL protocol adapter, not a separate driver. Supported operations: list tables, paginated browse, insert, update and delete; individual edits/deletes require a complete primary key. Database permissions apply. Tested against MariaDB 11.4; other versions are not verified.
+
+### Commands
+
+| Task | Command |
+| --- | --- |
+| Run the dev servers | `bun run dev` |
+| Run the test suite | `bun run test` |
+| Lint with Biome | `bun run lint` |
+| Apply Biome's safe fixes | `bun run lint:fix` |
+| Build | `bun run build` |
+| Type-check | `bun run typecheck` |
+| Start in production (PM2 where configured) | `bun run start` |
+
+`bun test` needs the throwaway MySQL, MariaDB, Postgres and Mongo services from `ci.yml` (same ports and `*_PASSWORD` variables); CI starts them as service containers. `bun run typecheck` type-checks.
+
+### Repo guide (kept from the previous AGENTS.md)
+
+### Objective and structure
 
 A small private database browser, not a query IDE. PostgreSQL public-schema tables, MySQL/MariaDB tables, uploaded SQLite databases and MongoDB collections; individual record CRUD only. See README.md and DEVELOPER.md.
 
@@ -8,11 +73,11 @@ A small private database browser, not a query IDE. PostgreSQL public-schema tabl
 - frontend/: React + Vite + Tailwind 4; shared ez tokens from ezjot/ezups/ezconv.
 - tests/: Bun tests and Python Playwright smoke checks.
 
-## Conventions
+### Conventions
 
-Use Bun 1.4.4, ESM, tabs, double quotes, semicolons and Biome. Keep changes modular and minimal. Preserve canonical BSON types and typed keys; never coerce hex string IDs to ObjectIds. Updates send changed fields only. Database permissions remain the authorization boundary.
+Use Bun, ESM, tabs, double quotes, semicolons and Biome. Keep changes modular and minimal. Preserve canonical BSON types and typed keys; never coerce hex string IDs to ObjectIds. Updates send changed fields only. Database permissions remain the authorization boundary.
 
-## Safety and verification
+### Safety and verification
 
 Never store/log credentials, add saved passwords, or access production databases for tests. Integration tests are destructive and fixed to isolated loopback ezdb_test instances. Use environment credentials, never literals. Preserve loopback defaults, HttpOnly sessions, cross-origin mutation rejection, redacted errors and explicit delete confirmation.
 
