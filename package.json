@@ -16,7 +16,7 @@
 		"lint:fix": "biome check --write ."
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.6.7",
+		"@biomejs/biome": "^2.6.8",
 		"@tailwindcss/cli": "^4.3.5",
 		"@tailwindcss/vite": "^4.3.5",
 		"@types/bun": "latest",
@@ -25,13 +25,13 @@
 		"vite": "^8.3.8"
 	},
 	"peerDependencies": {
-		"typescript": "^7"
+		"typescript": "^7.0.2"
 	},
 	"dependencies": {
 		"@fontsource-variable/public-sans": "^5.3.0",
 		"bson": "^7.3.4",
 		"elysia": "^1.4.32",
-		"mongodb": "^7.9.0",
+		"mongodb": "^7.9.1",
 		"mysql2": "^3.24.6",
 		"pg": "^8.23.1",
 		"react": "^19.3.1",
