@@ -1,14 +1,20 @@
 # Changelog
 
-## Unreleased — MariaDB
+## [Unreleased]
 
+## [1.0.1] - 2026-11-22
+
+### Changed
+- Dependencies updated (majors kept only where the tests passed), Docker image on oven/bun 1.4.5, Biome as the linter, and the shared ez favicon.
+
+### Added
 - Added explicit MariaDB connection option (port 3306), sharing the MySQL adapter.
 - Verified MariaDB 11.4 login, browsing, pagination and CRUD with primary-key guards.
 - Added MariaDB integration and browser login coverage plus an isolated CI service.
 
 Versions follow Semantic Versioning. Entries describe implemented changes, not publication status.
 
-## Unreleased — 1.0.0
+## [1.0.0]
 
 ### Added
 

@@ -1,8 +1,8 @@
 # ezdb
 
-**v1.0.0 · MIT**
+**v1.0.1 · MIT**
 
-[GitHub repository](https://github.com/c4lyp5o/ezdb) (private; repository access required). Version 1.0.0 is pushed to master; no version tag or GitHub Release has been published.
+[GitHub repository](https://github.com/c4lyp5o/ezdb) (private; repository access required). Version 1.0.1 is pushed to master; no version tag or GitHub Release has been published.
 
 A quiet, dark-first ez-series workspace built with Bun, Elysia, React, Vite and Tailwind 4. Version metadata lives in package.json and appears in the footer. The footer links to the GitHub repository.
 
