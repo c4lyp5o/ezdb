@@ -1,11 +1,11 @@
-FROM oven/bun:1.4.4 AS build
+FROM oven/bun:1.4.5 AS build
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY frontend ./frontend
 RUN bun run build
 
-FROM oven/bun:1.4.4
+FROM oven/bun:1.4.5
 WORKDIR /app
 ENV NODE_ENV=production EZDB_HOST=0.0.0.0 EZDB_PORT=8080
 COPY package.json bun.lock ./
