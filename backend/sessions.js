@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { logger } from "./logger.js";
 
 // Sessions and database connections stay in memory and are never persisted.
 export function createSessionStore({
@@ -21,7 +22,7 @@ export function createSessionStore({
 	}
 	const timer = setInterval(
 		() => {
-			sweep().catch(() => console.error("[ezdb] Session cleanup failed"));
+			sweep().catch(() => logger.error("[ezdb] Session cleanup failed"));
 		},
 		Math.min(ttlMs, 60000),
 	);
