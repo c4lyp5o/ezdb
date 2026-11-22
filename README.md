@@ -2,7 +2,7 @@
 
 **v1.0.1 · MIT**
 
-[GitHub repository](https://github.com/c4lyp5o/ezdb) (private; repository access required). Version 1.0.1 is pushed to master; no version tag or GitHub Release has been published.
+[GitHub repository](https://github.com/c4lyp5o/ezdb) (public, MIT). Version 1.0.1 is pushed to master; no version tag or GitHub Release has been published.
 
 A quiet, dark-first ez-series workspace built with Bun, Elysia, React, Vite and Tailwind 4. Version metadata lives in package.json and appears in the footer. The footer links to the GitHub repository.
 
@@ -57,7 +57,7 @@ The multi-stage image pins Bun 1.4.4, installs the lockfile, builds the frontend
 
 ## GitHub workflow
 
-CI is two workflows, the same in every ez repo. `test.yml` (lint, tests, build, and the Docker image built, booted and checked healthy) runs on pull requests and pushes to `development`. `publish.yml` runs `test.yml` first, then publishes the image on every push to `master` and on an optional `vX.Y.Z` tag; see [DEVELOPER.md](DEVELOPER.md#branches-and-releases). The test job also runs the isolated PostgreSQL/MySQL/MariaDB/MongoDB tests and the real Chromium smoke tests, and uploads the browser evidence as an artifact.
+CI is two workflows, the same in every ez repo. `test.yml` (lint, tests, build, and the Docker image built, booted and checked healthy) runs on pull requests. `publish.yml` runs `test.yml` first, then publishes the image: `:development` on every push to `development`, `:latest` and `:<version>` on every push to `master`, and a GitHub Release on an optional `vX.Y.Z` tag; see [DEVELOPER.md](DEVELOPER.md#branches-and-releases). The test job also runs the isolated PostgreSQL/MySQL/MariaDB/MongoDB tests and the real Chromium smoke tests, and uploads the browser evidence as an artifact.
 
 ## Project documentation
 
