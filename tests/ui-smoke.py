@@ -23,7 +23,7 @@ with sync_playwright() as pw:
             page.on("request", lambda request: requests.append(request.url))
             page.goto(BASE)
             expect(page.get_by_role("button", name="Connect", exact=True)).to_be_visible()
-            expect(page.get_by_role("contentinfo")).to_contain_text("v1.0.0")
+            expect(page.get_by_role("contentinfo")).to_contain_text("v1.0.1")
             source_link = page.get_by_role("contentinfo").get_by_role("link", name="GitHub", exact=True)
             expect(source_link).to_be_visible()
             expect(source_link).to_have_attribute("href", "https://github.com/c4lyp5o/ezdb")

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, encodeKey } from "./api.js";
 import { editableValues, editorPatch } from "./editor.js";
+import { Brand } from "./ez/Brand.jsx";
 import Footer from "./Footer.jsx";
 
 const DEFAULTS = {
@@ -12,19 +13,6 @@ const DEFAULTS = {
 	password: "",
 };
 const PAGE_SIZES = [10, 25, 50, 100];
-
-function Brand() {
-	return (
-		<div className="brand">
-			<span className="brand-mark" aria-hidden="true">
-				▤
-			</span>
-			<span>
-				ezdb<span className="text-mute font-normal"> / workspace</span>
-			</span>
-		</div>
-	);
-}
 
 function Connect({ onConnected }) {
 	const [file, setFile] = useState(null);
@@ -59,7 +47,7 @@ function Connect({ onConnected }) {
 	return (
 		<div className="connection-shell">
 			<section className="connection-intro">
-				<Brand />
+				<Brand name="ezdb" scope="Database workspace" />
 				<div>
 					<span className="eyebrow">DATABASE WORKSPACE</span>
 					<h1>
@@ -411,7 +399,7 @@ function Browser({ onDisconnect, engine, database }) {
 	return (
 		<div className="flex min-h-screen flex-col md:flex-row">
 			<aside className="workspace-nav border-b p-5 md:w-64 md:border-r md:border-b-0">
-				<Brand />
+				<Brand name="ezdb" scope="Database workspace" />
 				<div className="eyebrow mt-10 mb-3">
 					CONNECTED / {engine.toUpperCase()}
 				</div>

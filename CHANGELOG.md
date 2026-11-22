@@ -1,14 +1,25 @@
 # Changelog
 
-## Unreleased — MariaDB
+## [Unreleased]
 
+## [1.0.1] - 2026-11-22
+
+### Changed
+- Logs go to the console (`docker logs`) and to rotating files in `$DATA_DIR/logs` (`ezdb.log`): 5 MB per file, 3 files kept. Each process writes its own file. Mount `/data` to keep them.
+- The Docker image follows the ez standard: Alpine, runs as the unprivileged `bun` user (uid 1000), and a `HEALTHCHECK` that reports healthy within seconds of start.
+- CI is two workflows, `test.yml` and `publish.yml`. Merging to `master` publishes `:<version>`, `:latest` and `:sha-<commit>` after the tests (and an image boot check) pass; a `vX.Y.Z` tag is optional and adds a GitHub Release.
+- Every push to `development` publishes `:development` and `:sha-<commit>` after the tests, so unreleased changes can be tried without touching `master`.
+- The image moves from the Debian to the Alpine Bun base and gains a healthcheck.
+- Header, sidebar and sign-in use the shared ez `Brand`: the ez icon and the lowercase name.
+- Dependencies updated (majors kept only where the tests passed), Docker image on oven/bun 1.4.5, Biome as the linter, and the shared ez favicon.
+
+### Added
 - Added explicit MariaDB connection option (port 3306), sharing the MySQL adapter.
 - Verified MariaDB 11.4 login, browsing, pagination and CRUD with primary-key guards.
 - Added MariaDB integration and browser login coverage plus an isolated CI service.
-
 Versions follow Semantic Versioning. Entries describe implemented changes, not publication status.
 
-## Unreleased — 1.0.0
+## [1.0.0]
 
 ### Added
 

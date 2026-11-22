@@ -1,8 +1,8 @@
 # ezdb
 
-**v1.0.0 · MIT**
+**v1.0.1 · MIT**
 
-[GitHub repository](https://github.com/c4lyp5o/ezdb) (private; repository access required). Version 1.0.0 is pushed to master; no version tag or GitHub Release has been published.
+[GitHub repository](https://github.com/c4lyp5o/ezdb) (public, MIT). Version 1.0.1 is pushed to master; no version tag or GitHub Release has been published.
 
 A quiet, dark-first ez-series workspace built with Bun, Elysia, React, Vite and Tailwind 4. Version metadata lives in package.json and appears in the footer. The footer links to the GitHub repository.
 
@@ -40,7 +40,7 @@ Sessions and connections are in memory, expire after 30 idle minutes and are swe
     bun test
     bun run build
 
-Integration tests require isolated ezdb_test databases on loopback PostgreSQL 55432 (postgres user), MySQL 53306, MariaDB 53307 and MongoDB 57017 (ezdb user; MongoDB admin authentication). Export PG_PASSWORD, MYSQL_PASSWORD, MARIADB_PASSWORD and MONGO_PASSWORD securely. Tests reset named fixture tables/collections; never point them at production. See CONTRIBUTING.md for fixture setup.
+Integration tests require isolated ezdb_test databases on loopback PostgreSQL 55432 (postgres user), MySQL 53306, MariaDB 53307 and MongoDB 57017 (ezdb user; MongoDB admin authentication). Export PG_PASSWORD, MYSQL_PASSWORD, MARIADB_PASSWORD and MONGO_PASSWORD securely. Tests reset named fixture tables/collections; never point them at production. See DEVELOPER.md for fixture setup.
 
 With the built server running and Python Playwright installed:
 
@@ -51,23 +51,21 @@ The browser suite submits the real login form using isolated fixture credentials
 ## Container packaging
 
     docker build -t ezdb:local .
-    docker run --rm -p 127.0.0.1:8080:8080 ezdb:local
+    docker run --rm -p 127.0.0.1:8080:8080 -v ./ezdb-data:/data ezdb:local   # /data holds logs/
 
 The multi-stage image pins Bun 1.4.4, installs the lockfile, builds the frontend and runs as non-root. Publish only on loopback unless you have secured a trusted private ingress. Inside a container, localhost refers to that container, not the host database; use a database reachable on its private Docker network. No credentials are embedded in the image.
 
 ## GitHub workflow
 
-The workflow in .github/workflows/ci.yml follows the ez-series Test → GHCR image pattern. PRs and pushes to main, master or development run locked dependency installation, release metadata validation, lint, typecheck, isolated PostgreSQL/MySQL/MariaDB/MongoDB tests, production build and real Chromium smoke tests. Browser evidence is uploaded as an artifact. Only successful push runs publish an amd64 image; PRs and manual runs do not publish.
-
-Stable branches publish latest and their branch name, development publishes development, and version tags publish their exact tag. Every image also receives a full commit-SHA tag. Version tags must match package.json. The built-in GITHUB_TOKEN needs packages:write for publishing. There is no deploy job and no automatic GitHub Release creation. These are configured workflows, not a claim of a successful hosted CI run.
+CI is two workflows, the same in every ez repo. `test.yml` (lint, tests, build, and the Docker image built, booted and checked healthy) runs on pull requests. `publish.yml` runs `test.yml` first, then publishes the image: `:development` on every push to `development`, `:latest` and `:<version>` on every push to `master`, and a GitHub Release on an optional `vX.Y.Z` tag; see [DEVELOPER.md](DEVELOPER.md#branches-and-releases). The test job also runs the isolated PostgreSQL/MySQL/MariaDB/MongoDB tests and the real Chromium smoke tests, and uploads the browser evidence as an artifact.
 
 ## Project documentation
 
-- [Contributing and test setup](CONTRIBUTING.md)
+- [Contributing and test setup](DEVELOPER.md)
 - [Architecture and write semantics](DEVELOPER.md)
 - [Agent contract](AGENTS.md)
 - [Changelog](CHANGELOG.md)
-- [Security boundaries and reporting](SECURITY.md)
+- [Security boundaries and reporting](#security-policy)
 - [MIT license](LICENSE)
 
 The footer displays the package version and links to [c4lyp5o/ezdb](https://github.com/c4lyp5o/ezdb). The repository is private, so viewing source requires GitHub access.
@@ -85,3 +83,19 @@ CI uses Ubuntu 24.04 and updated Node 24-based Actions, with isolated MySQL 8.4 
 Select **MariaDB** in the connection form (default port 3306). It shares the MySQL protocol adapter, not a separate driver. Supported operations: list tables, paginated browse, insert, update and delete; individual edits/deletes require a complete primary key. Database permissions apply. Tested against MariaDB 11.4; other versions are not verified.
 
 Tests require an isolated loopback MariaDB on port 53307, database ezdb_test, user ezdb. Supply MARIADB_PASSWORD securely for test fixtures only. CI provisions this instance automatically. MariaDB coverage includes real HTTP login/session/CRUD/logout, composite-key guards, identifier injection refusal and redacted authentication failures.
+
+## Security policy
+
+This tool is for localhost or trusted private networks only. No supported public service or guaranteed response SLA is offered. Use least-privilege database accounts and a trusted TLS ingress for remote private access. Application sessions hold live database connections in process memory; restarting clears them. No saved passwords or connections are provided.
+
+Do not file public issues containing credentials, exploit payloads against real systems or database records. Report vulnerabilities privately to the repository owner using GitHub private vulnerability reporting if enabled, or an existing private channel. Do not assume that reporting is enabled before the repository is published.
+
+Known hardening gaps include connection/rate quotas, exhaustive type coverage and a full security audit. Browser-to-app TLS does not configure database transport TLS. Do not expose the app to the public internet. Tests are destructive and must only target dedicated fixtures.
+
+### MySQL, MariaDB and uploaded SQLite
+
+MySQL and MariaDB tables support browsing, pagination and record CRUD using database permissions. SQLite accepts standalone database uploads (32 MiB maximum); no server path or environment configuration is needed. Uploading requires explicit acknowledgement that the entire database is sent to a trusted server/operator. Use an offline backup, not a live WAL file.
+
+Uploaded files are private per session, use generated storage names, and are removed on disconnect or 30 idle minutes. A fixed 24-hour deadline is enforced independently of activity; a 30-second cleanup sweep and startup sweep remove expired files and SQLite sidecars. If the server is stopped, cleanup resumes at startup. Operator backups/forensic erasure cannot be guaranteed. Download the edited copy before leaving; the original local file is not changed. Primary keys are required for individual SQL edits/deletes. No raw SQL console is exposed.
+
+CI uses Ubuntu 24.04 and updated Node 24-based Actions, with isolated MySQL 8.4 and MariaDB 11.4 integration fixtures.
