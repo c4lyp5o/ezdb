@@ -51,7 +51,7 @@ The browser suite submits the real login form using isolated fixture credentials
 ## Container packaging
 
     docker build -t ezdb:local .
-    docker run --rm -p 127.0.0.1:8080:8080 ezdb:local
+    docker run --rm -p 127.0.0.1:8080:8080 -v ./ezdb-data:/data ezdb:local   # /data holds logs/
 
 The multi-stage image pins Bun 1.4.4, installs the lockfile, builds the frontend and runs as non-root. Publish only on loopback unless you have secured a trusted private ingress. Inside a container, localhost refers to that container, not the host database; use a database reachable on its private Docker network. No credentials are embedded in the image.
 

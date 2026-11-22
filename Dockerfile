@@ -22,6 +22,7 @@ ENV TZ=Asia/Kuala_Lumpur \
 	NODE_ENV=production \
 	HOST=0.0.0.0 \
 	PORT=8080 \
+	DATA_DIR=/data \
 	EZDB_HOST=0.0.0.0 \
 	EZDB_PORT=8080
 WORKDIR /app
@@ -29,8 +30,9 @@ COPY package.json bun.lock ./
 RUN bun install --production --frozen-lockfile --ignore-scripts
 COPY backend ./backend
 COPY --from=build /app/frontend/dist ./frontend/dist
-RUN mkdir -p /tmp/ezdb-sqlite-uploads && chown -R bun:bun /tmp/ezdb-sqlite-uploads
+RUN mkdir -p /data /data/logs /tmp/ezdb-sqlite-uploads && chown -R bun:bun /data /data/logs /tmp/ezdb-sqlite-uploads
 USER bun
+VOLUME ["/data"]
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --start-interval=2s --retries=3 \
 	CMD wget -qO- "http://127.0.0.1:${PORT}/" >/dev/null || exit 1

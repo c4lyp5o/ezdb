@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { Elysia, t } from "elysia";
 import { clampPage, decodeKey } from "./keys.js";
+import { logger } from "./logger.js";
 import * as mongoAdapter from "./mongo.js";
 import * as mysqlAdapter from "./mysql.js";
 import * as pgAdapter from "./postgres.js";
@@ -44,7 +45,7 @@ export function createApp({ sessions = createSessionStore() } = {}) {
 			const status = error.status ?? (code === "VALIDATION" ? 422 : 500);
 			set.status = status;
 			if (status >= 500)
-				console.error(`[ezdb] ${code ?? "ERROR"}: request failed`);
+				logger.error(`[ezdb] ${code ?? "ERROR"}: request failed`);
 			// Never echo driver internals or credentials to the client.
 			return {
 				message:
@@ -250,5 +251,5 @@ if (import.meta.main) {
 			return Bun.file(target);
 		})
 		.listen({ hostname: HOST, port: PORT });
-	console.log(`ezdb listening on ${HOST}:${app.server?.port}`);
+	logger.info(`ezdb listening on ${HOST}:${app.server?.port}`);
 }
