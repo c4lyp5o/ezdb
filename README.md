@@ -57,9 +57,7 @@ The multi-stage image pins Bun 1.4.4, installs the lockfile, builds the frontend
 
 ## GitHub workflow
 
-The workflow in .github/workflows/ci.yml follows the ez-series Test → GHCR image pattern. PRs and pushes to main, master or development run locked dependency installation, release metadata validation, lint, typecheck, isolated PostgreSQL/MySQL/MariaDB/MongoDB tests, production build and real Chromium smoke tests. Browser evidence is uploaded as an artifact. Only successful push runs publish an amd64 image; PRs and manual runs do not publish.
-
-Stable branches publish latest and their branch name, development publishes development, and version tags publish their exact tag. Every image also receives a full commit-SHA tag. Version tags must match package.json. The built-in GITHUB_TOKEN needs packages:write for publishing. There is no deploy job and no automatic GitHub Release creation. These are configured workflows, not a claim of a successful hosted CI run.
+CI is two workflows, the same in every ez repo. `test.yml` (lint, tests, build, and the Docker image built, booted and checked healthy) runs on pull requests and pushes to `development`. `publish.yml` runs `test.yml` first, then publishes the image on every push to `master` and on an optional `vX.Y.Z` tag; see [DEVELOPER.md](DEVELOPER.md#branches-and-releases). The test job also runs the isolated PostgreSQL/MySQL/MariaDB/MongoDB tests and the real Chromium smoke tests, and uploads the browser evidence as an artifact.
 
 ## Project documentation
 
